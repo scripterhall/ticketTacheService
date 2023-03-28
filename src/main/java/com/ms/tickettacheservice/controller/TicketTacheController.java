@@ -116,6 +116,8 @@ public class TicketTacheController {
 
     HistoireTicket ht = this.histoireTicketFeignClient.ticketHistoireById(ticketTacheSaved.getTicketHistoireId());
     
+   
+
     if (ticketTacheSaved.getSprintBacklogId() != null) {
         SprintBacklog sprintBacklog = this.sprintBacklogFeignClient.getSprintBacklogById(ticketTacheSaved.getSprintBacklogId());
         ticketTacheSaved.setSprintBacklog(sprintBacklog);
