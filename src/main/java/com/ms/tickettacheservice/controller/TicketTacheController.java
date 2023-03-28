@@ -20,6 +20,10 @@ import com.ms.tickettacheservice.model.HistoireTicket;
 import com.ms.tickettacheservice.model.Membre;
 import com.ms.tickettacheservice.model.SprintBacklog;
 import org.springframework.web.client.RestTemplate;
+import com.ms.tickettacheservice.service.HistoireTicketFeignClient;
+import com.ms.tickettacheservice.service.MembreFeignClient;
+import com.ms.tickettacheservice.service.SprintBacklogFeignClient;
+import com.ms.tickettacheservice.service.TicketTacheService;
 
 @RestController
 @RequestMapping("ticket-taches")
@@ -39,7 +43,7 @@ public class TicketTacheController {
     @Autowired
     private SprintFeignClient sprintFeignClient;
 
-    @GetMapping("/sprints/{sprintId}/ticket-taches")
+    @GetMapping
     public ResponseEntity<List<TicketTache>> getTicketsTacheByIdSprint(@RequestParam("sprintId") Long sprintId) {
         List<TicketTache> tts = this.ticketTacheService.findAll();
         List<TicketTache> filteredTts = new ArrayList<>();
