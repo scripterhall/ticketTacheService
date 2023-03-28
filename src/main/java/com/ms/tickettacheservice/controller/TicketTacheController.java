@@ -1,27 +1,25 @@
 package com.ms.tickettacheservice.controller;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
+import com.ms.tickettacheservice.model.Sprint;
+import com.ms.tickettacheservice.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.ms.tickettacheservice.entity.TicketTache;
 import com.ms.tickettacheservice.model.HistoireTicket;
 import com.ms.tickettacheservice.model.Membre;
 import com.ms.tickettacheservice.model.SprintBacklog;
+import org.springframework.web.client.RestTemplate;
 import com.ms.tickettacheservice.service.HistoireTicketFeignClient;
 import com.ms.tickettacheservice.service.MembreFeignClient;
 import com.ms.tickettacheservice.service.SprintBacklogFeignClient;
@@ -42,6 +40,33 @@ public class TicketTacheController {
 
     @Autowired
     SprintBacklogFeignClient sprintBacklogFeignClient;
+    @Autowired
+    private SprintFeignClient sprintFeignClient;
+
+    @GetMapping
+    public ResponseEntity<List<TicketTache>> getTicketsTacheByIdSprint(@RequestParam("sprintId") Long sprintId) {
+        List<TicketTache> tts = this.ticketTacheService.findAll();
+        List<TicketTache> filteredTts = new ArrayList<>();
+        for (TicketTache tt : tts) {
+            if (tt.getSprintBacklogId() != null) {
+                tt.setSprintBacklog(this.sprintBacklogFeignClient.getSprintBacklogById(tt.getSprintBacklogId()));
+                if (tt.getSprintBacklog().getSprintId().equals(sprintId)) {
+                    Sprint sprint = this.sprintFeignClient.getSprintById(sprintId);
+                    if(sprint.getEtat().equals("terminé")){
+                            this.ticketTacheService.modifierTicketTache(tt);
+                    }
+                    else if(sprint.getEtat().equals("en attente")){
+                        this.ticketTacheService.modifierTicketTache(tt);
+                    }
+                    filteredTts.add(tt);
+                }
+            }
+        }
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(filteredTts);
+    }
+
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody

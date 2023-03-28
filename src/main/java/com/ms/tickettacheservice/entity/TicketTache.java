@@ -49,13 +49,13 @@ public class TicketTache extends Ticket {
     @Column(name="ticket_histoire_id")
     private Long ticketHistoireId;
 
-    private String etat;//  en cours .. a verifier .. a faire .. terminer
+    private String etat;//  en cours .. a verifier .. a faire .. termine
 
     @Transient
     private Membre membre; 
 
     @Transient
-    private HistoireTicket ht; 
+    private HistoireTicket ht;
 
     @Transient
     private SprintBacklog sprintBacklog;

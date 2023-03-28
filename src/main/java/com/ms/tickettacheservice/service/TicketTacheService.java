@@ -4,6 +4,7 @@ package com.ms.tickettacheservice.service;
 
 
 
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -23,7 +24,9 @@ public class TicketTacheService {
     @Autowired
     private TicketTacheRepository ticketTacheRepository;
 
-
+    public List<TicketTache> findAll() {
+        return this.ticketTacheRepository.findAll();
+    }
     public TicketTache ajouterTicketTache(TicketTache tt){
         if(this.ticketTacheRepository.findByTitre(tt.getTitre()).size()==0)
             return this.ticketTacheRepository.save(tt);
