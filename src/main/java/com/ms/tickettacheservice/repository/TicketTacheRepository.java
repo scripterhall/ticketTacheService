@@ -11,5 +11,6 @@ public interface TicketTacheRepository extends JpaRepository<TicketTache,Long> {
     List<TicketTache> findByTitre(String titre);
     List<TicketTache> findByTicketHistoireId(Long id);
     void deleteAllByTicketHistoireId(Long id);
+    List<TicketTache> findByMembreId(Long id);
     
 }

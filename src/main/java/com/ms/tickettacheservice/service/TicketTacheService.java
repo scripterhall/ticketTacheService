@@ -4,6 +4,7 @@ package com.ms.tickettacheservice.service;
 
 
 
+
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Date;
@@ -28,10 +29,18 @@ public class TicketTacheService {
         return this.ticketTacheRepository.findAll();
     }
     public TicketTache ajouterTicketTache(TicketTache tt){
-        if(this.ticketTacheRepository.findByTitre(tt.getTitre()).size()==0)
+    
+            List<TicketTache> tts = this.ticketTacheRepository.findAll();
+            for(TicketTache ticket:tts){
+                
+                if(tt.equals(ticket)){
+                    return null;
+                }
+                    
+            }
             return this.ticketTacheRepository.save(tt);
         
-        return null;
+       
     } 
 
     public TicketTache getTicketTacheById(Long id){
@@ -87,5 +96,10 @@ public class TicketTacheService {
     }
     //Possibilter de creation d un corbeille pour les ticket supprimer
 
-
+    public List<TicketTache> getTicketTacheByMembreId(Long id) throws SQLException {
+        if(id == null)
+            return Collections.emptyList() ;
+        else 
+            return this.ticketTacheRepository.findByMembreId(id);
+    }
 }

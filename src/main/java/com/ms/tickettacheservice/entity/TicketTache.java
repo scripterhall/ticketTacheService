@@ -60,4 +60,11 @@ public class TicketTache extends Ticket {
     @Transient
     private SprintBacklog sprintBacklog;
     
+    @Override
+    public boolean equals(Object ticket){
+        return super.getTitre().equals(((TicketTache)ticket).getTitre()) && 
+         super.getDescription().equals(((TicketTache)ticket).getDescription());
+    }
+
+    
 }

@@ -19,7 +19,7 @@ import com.ms.tickettacheservice.entity.TicketTache;
 import com.ms.tickettacheservice.model.HistoireTicket;
 import com.ms.tickettacheservice.model.Membre;
 import com.ms.tickettacheservice.model.SprintBacklog;
-import org.springframework.web.client.RestTemplate;
+
 import com.ms.tickettacheservice.service.HistoireTicketFeignClient;
 import com.ms.tickettacheservice.service.MembreFeignClient;
 import com.ms.tickettacheservice.service.SprintBacklogFeignClient;
@@ -58,6 +58,8 @@ public class TicketTacheController {
                     else if(sprint.getEtat().equals("en attente")){
                         this.ticketTacheService.modifierTicketTache(tt);
                     }
+                    if(tt.getTicketHistoireId()!=null)
+                        tt.setHt(this.histoireTicketFeignClient.ticketHistoireById(tt.getTicketHistoireId()));
                     filteredTts.add(tt);
                 }
             }
@@ -73,6 +75,11 @@ public class TicketTacheController {
     public ResponseEntity<TicketTache> ajouterTicketTache(@RequestBody TicketTache tt) {
        
         TicketTache tt_saved =  ticketTacheService.ajouterTicketTache(tt);
+
+        if(tt_saved == null){
+            return  new ResponseEntity<>(tt_saved, HttpStatus.BAD_REQUEST);
+        }
+
         if(tt.getSprintBacklogId()!=null){
         SprintBacklog sprintBacklog = this.sprintBacklogFeignClient.getSprintBacklogById(tt.getSprintBacklogId());
         tt_saved.setSprintBacklog(sprintBacklog);
@@ -141,6 +148,8 @@ public class TicketTacheController {
 
     HistoireTicket ht = this.histoireTicketFeignClient.ticketHistoireById(ticketTacheSaved.getTicketHistoireId());
     
+   
+
     if (ticketTacheSaved.getSprintBacklogId() != null) {
         SprintBacklog sprintBacklog = this.sprintBacklogFeignClient.getSprintBacklogById(ticketTacheSaved.getSprintBacklogId());
         ticketTacheSaved.setSprintBacklog(sprintBacklog);
@@ -191,6 +200,30 @@ public class TicketTacheController {
         .body(tts);
     }
 
+    @GetMapping("/membre/{id}")
+    public ResponseEntity<List<TicketTache>> getTicketsTacheByMembreId(@PathVariable("id") Long id){
+
+        if(id == null)
+            return ResponseEntity.badRequest().body(null);
+        else{
+            try{
+                List<TicketTache> ticketsTache = this.ticketTacheService.getTicketTacheByMembreId(id);
+                ticketsTache.forEach(ticketTache ->{
+                    if(ticketTache.getTicketHistoireId() !=null)
+                        ticketTache.setHt(this.histoireTicketFeignClient.ticketHistoireById(ticketTache.getTicketHistoireId())); 
+                    if(ticketTache.getSprintBacklogId()!=null)
+                        ticketTache.setSprintBacklog(this.sprintBacklogFeignClient.getSprintBacklogById(ticketTache.getSprintBacklogId()));
+                    ticketTache.setMembre(this.membreClient.getMembreById(id));
+                });
+                return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(ticketsTache);
+            }catch(SQLException error){
+                return ResponseEntity.internalServerError().body(null);
+            }  
+        }
+    }
+   
     
 
 
