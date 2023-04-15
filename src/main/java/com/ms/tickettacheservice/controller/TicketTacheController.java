@@ -2,7 +2,6 @@ package com.ms.tickettacheservice.controller;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 
@@ -25,6 +24,8 @@ import com.ms.tickettacheservice.service.HistoireTicketFeignClient;
 import com.ms.tickettacheservice.service.MembreFeignClient;
 import com.ms.tickettacheservice.service.SprintBacklogFeignClient;
 import com.ms.tickettacheservice.service.TicketTacheService;
+
+import jakarta.transaction.Transactional;
 
 @RestController
 @RequestMapping("ticket-taches")
@@ -56,7 +57,7 @@ public class TicketTacheController {
                     if(sprint.getEtat().equals("terminé")){
                             this.ticketTacheService.modifierTicketTache(tt);
                     }
-                    else if(sprint.getEtat().equals("en attente")){
+                    if(sprint.getEtat().equals("en attente")){
                         this.ticketTacheService.modifierTicketTache(tt);
                     }
                     if(tt.getTicketHistoireId()!=null)
@@ -69,7 +70,6 @@ public class TicketTacheController {
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .body(filteredTts);
     }
-
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -90,7 +90,6 @@ public class TicketTacheController {
         return  new ResponseEntity<>(tt_saved, HttpStatus.CREATED);
 
     }
-
 
     @GetMapping("/{id}")
     @ResponseBody
@@ -176,16 +175,17 @@ public class TicketTacheController {
     return ResponseEntity.noContent().build();
     }
 
-
     @DeleteMapping("/ticket-histoire/{id}")
     @Transactional
     public ResponseEntity<Void> supprimerTicketTacheParTicketHistoire(@PathVariable("id") Long id) {
-        try {
+       
+            try{
             ticketTacheService.deleteAllByTicketHistoireId(id);
             return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            return ResponseEntity.notFound().build();
-        }
+            }catch(Exception e){
+                return ResponseEntity.internalServerError().body(null);
+            }
+        
     }
 
     @GetMapping("/ticket-histoire/{id-ticket-histoire}")
@@ -226,8 +226,4 @@ public class TicketTacheController {
         }
     }
    
-    
-
-
-
 }
