@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.ms.tickettacheservice.model.Sprint;
 import com.ms.tickettacheservice.service.*;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -177,6 +178,7 @@ public class TicketTacheController {
 
 
     @DeleteMapping("/ticket-histoire/{id}")
+    @Transactional
     public ResponseEntity<Void> supprimerTicketTacheParTicketHistoire(@PathVariable("id") Long id) {
         try {
             ticketTacheService.deleteAllByTicketHistoireId(id);
