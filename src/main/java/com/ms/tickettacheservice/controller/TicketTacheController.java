@@ -4,7 +4,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-
 import com.ms.tickettacheservice.model.Sprint;
 import com.ms.tickettacheservice.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +28,7 @@ import jakarta.transaction.Transactional;
 @RestController
 @RequestMapping("ticket-taches")
 public class TicketTacheController {
-    
+
     @Autowired
     private TicketTacheService ticketTacheService;
 
@@ -44,6 +43,9 @@ public class TicketTacheController {
     @Autowired
     private SprintFeignClient sprintFeignClient;
 
+    @Autowired
+    private CorbeilleFeignClient corbeilleFeignClient;
+
     @GetMapping
     public ResponseEntity<List<TicketTache>> getTicketsTacheByIdSprint(@RequestParam("sprintId") Long sprintId) {
         List<TicketTache> tts = this.ticketTacheService.findAll();
@@ -53,13 +55,13 @@ public class TicketTacheController {
                 tt.setSprintBacklog(this.sprintBacklogFeignClient.getSprintBacklogById(tt.getSprintBacklogId()));
                 if (tt.getSprintBacklog().getSprintId().equals(sprintId)) {
                     Sprint sprint = this.sprintFeignClient.getSprintById(sprintId);
-                    if(sprint.getEtat().equals("terminé")){
-                            this.ticketTacheService.modifierTicketTache(tt);
-                    }
-                    if(sprint.getEtat().equals("en attente")){
+                    if (sprint.getEtat().equals("terminé")) {
                         this.ticketTacheService.modifierTicketTache(tt);
                     }
-                    if(tt.getTicketHistoireId()!=null)
+                    if (sprint.getEtat().equals("en attente")) {
+                        this.ticketTacheService.modifierTicketTache(tt);
+                    }
+                    if (tt.getTicketHistoireId() != null)
                         tt.setHt(this.histoireTicketFeignClient.ticketHistoireById(tt.getTicketHistoireId()));
                     filteredTts.add(tt);
                 }
@@ -73,20 +75,20 @@ public class TicketTacheController {
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<TicketTache> ajouterTicketTache(@RequestBody TicketTache tt) {
-       
-        TicketTache tt_saved =  ticketTacheService.ajouterTicketTache(tt);
 
-        if(tt_saved == null){
-            return  new ResponseEntity<>(tt_saved, HttpStatus.BAD_REQUEST);
+        TicketTache tt_saved = ticketTacheService.ajouterTicketTache(tt);
+
+        if (tt_saved == null) {
+            return new ResponseEntity<>(tt_saved, HttpStatus.BAD_REQUEST);
         }
 
-        if(tt.getSprintBacklogId()!=null){
-        SprintBacklog sprintBacklog = this.sprintBacklogFeignClient.getSprintBacklogById(tt.getSprintBacklogId());
-        tt_saved.setSprintBacklog(sprintBacklog);
+        if (tt.getSprintBacklogId() != null) {
+            SprintBacklog sprintBacklog = this.sprintBacklogFeignClient.getSprintBacklogById(tt.getSprintBacklogId());
+            tt_saved.setSprintBacklog(sprintBacklog);
         }
-        HistoireTicket ht = this.histoireTicketFeignClient.ticketHistoireById(tt.getTicketHistoireId()); 
+        HistoireTicket ht = this.histoireTicketFeignClient.ticketHistoireById(tt.getTicketHistoireId());
         tt_saved.setHt(ht);
-        return  new ResponseEntity<>(tt_saved, HttpStatus.CREATED);
+        return new ResponseEntity<>(tt_saved, HttpStatus.CREATED);
 
     }
 
@@ -99,79 +101,80 @@ public class TicketTacheController {
         if (tt == null) {
             return ResponseEntity.notFound().build();
         }
-     
+
         SprintBacklog sprintBacklog = this.sprintBacklogFeignClient.getSprintBacklogById(tt.getSprintBacklogId());
         HistoireTicket ht = this.histoireTicketFeignClient.ticketHistoireById(tt.getTicketHistoireId());
-        
-        if(tt.getMembreId() != null) {
-             Membre membre = this.membreClient.getMembreById(tt.getMembreId());
-             tt.setMembre(membre);
+
+        if (tt.getMembreId() != null) {
+            Membre membre = this.membreClient.getMembreById(tt.getMembreId());
+            tt.setMembre(membre);
         }
-        
+
         tt.setHt(ht);
         tt.setSprintBacklog(sprintBacklog);
-        
-        
-        return  new ResponseEntity<>(tt, HttpStatus.OK);
+
+        return new ResponseEntity<>(tt, HttpStatus.OK);
     }
 
     @PutMapping("/{id-ticket}")
     @ResponseBody
-    public ResponseEntity<TicketTache> prendreTicketTache(@RequestBody Membre membre,@PathVariable("id-ticket") Long id) {
+    public ResponseEntity<TicketTache> prendreTicketTache(@RequestBody Membre membre,
+            @PathVariable("id-ticket") Long id) {
         TicketTache ticketTache = ticketTacheService.prendreTicketTache(membre, id);
 
         if (ticketTache == null) {
             return ResponseEntity.notFound().build();
         }
-    
-        SprintBacklog sprintBacklog = this.sprintBacklogFeignClient.getSprintBacklogById(ticketTache.getSprintBacklogId());
+
+        SprintBacklog sprintBacklog = this.sprintBacklogFeignClient
+                .getSprintBacklogById(ticketTache.getSprintBacklogId());
         HistoireTicket ht = this.histoireTicketFeignClient.ticketHistoireById(ticketTache.getTicketHistoireId());
         ticketTache.setSprintBacklog(sprintBacklog);
         ticketTache.setHt(ht);
         ticketTache.setMembre(membre);
-    
+
         return ResponseEntity.ok()
-            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-            .body(ticketTache);
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(ticketTache);
     }
 
     @PutMapping
     @ResponseBody
-    public  ResponseEntity<TicketTache> modifierTicketTache(@RequestBody TicketTache ticketTache) {
-       
+    public ResponseEntity<TicketTache> modifierTicketTache(@RequestBody TicketTache ticketTache) {
+
         TicketTache ticketTacheSaved = ticketTacheService.modifierTicketTache(ticketTache);
 
-    if (ticketTacheSaved == null) 
-        return ResponseEntity.notFound().build();
-    
+        if (ticketTacheSaved == null)
+            return ResponseEntity.notFound().build();
 
-    HistoireTicket ht = this.histoireTicketFeignClient.ticketHistoireById(ticketTacheSaved.getTicketHistoireId());
-    
-   
+        HistoireTicket ht = this.histoireTicketFeignClient.ticketHistoireById(ticketTacheSaved.getTicketHistoireId());
 
-    if (ticketTacheSaved.getSprintBacklogId() != null) {
-        SprintBacklog sprintBacklog = this.sprintBacklogFeignClient.getSprintBacklogById(ticketTacheSaved.getSprintBacklogId());
-        ticketTacheSaved.setSprintBacklog(sprintBacklog);
-    }
+        if (ticketTacheSaved.getSprintBacklogId() != null) {
+            SprintBacklog sprintBacklog = this.sprintBacklogFeignClient
+                    .getSprintBacklogById(ticketTacheSaved.getSprintBacklogId());
+            ticketTacheSaved.setSprintBacklog(sprintBacklog);
+        }
 
-    ticketTacheSaved.setHt(ht);
+        ticketTacheSaved.setHt(ht);
 
-    return ResponseEntity.ok()
-        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-        .body(ticketTacheSaved);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(ticketTacheSaved);
 
     }
-
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void>  supprimerTicketTache(@PathVariable("id") Long id) {
+        if(id!=null){
+        TicketTache ticket = this.ticketTacheService.getTicketTacheById(id);
+        ticket.setId(id);
+        this.corbeilleFeignClient.ajouterTicketTache(ticket);
         boolean isDeleted = ticketTacheService.supprimerTicketTache(id);
-
-    if (!isDeleted) {
-        return ResponseEntity.notFound().build();
-    }
-
-    return ResponseEntity.noContent().build();
+        if (!isDeleted) 
+            return ResponseEntity.notFound().build();
+        return ResponseEntity.noContent().build();
+    }else 
+        return ResponseEntity.badRequest().body(null);
     }
 
     @DeleteMapping("/ticket-histoire/{id}")
@@ -193,6 +196,7 @@ public class TicketTacheController {
         for (TicketTache tt : tts) {
             if (tt.getMembreId() != null) {
                 tt.setMembre(this.membreClient.getMembreById(tt.getMembreId()));
+
             }
             tt.setHt(histoireTicketFeignClient.ticketHistoireById(id));
         }
@@ -221,8 +225,8 @@ public class TicketTacheController {
                 .body(ticketsTache);
             }catch(SQLException error){
                 return ResponseEntity.internalServerError().body(null);
-            }  
+            }
         }
     }
-   
+  
 }
