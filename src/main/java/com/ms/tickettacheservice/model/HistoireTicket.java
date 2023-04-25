@@ -17,7 +17,7 @@ public class HistoireTicket extends Ticket{
     
     private Long id;
     private String priorite;
-    private Date dateDeb;
+    private Date dateDebut;
     private Date dateFin;
     private int effort;
     private Long productBacklogId;
