@@ -7,7 +7,6 @@ import java.util.Date;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper=false)
 public class Sprint {
     private Long id;
     private Date dateLancement;

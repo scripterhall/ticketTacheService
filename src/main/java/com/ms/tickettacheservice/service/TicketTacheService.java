@@ -3,6 +3,7 @@ package com.ms.tickettacheservice.service;
 
 
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -84,7 +85,7 @@ public class TicketTacheService {
         if(tts!=null)
             return tts;
         else
-            return null;
+            return Collections.emptyList(); 
     }
 
     public void deleteAllByTicketHistoireId(Long id){
@@ -94,8 +95,9 @@ public class TicketTacheService {
 
     public List<TicketTache> getTicketTacheByMembreId(Long id) throws SQLException {
         if(id == null)
-            return null ;
+            return Collections.emptyList(); 
         else 
             return this.ticketTacheRepository.findByMembreId(id);
     }
+
 }
