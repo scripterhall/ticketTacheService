@@ -27,17 +27,14 @@ public class TicketTacheService {
     }
     public TicketTache ajouterTicketTache(TicketTache tt){
     
-            List<TicketTache> tts = this.ticketTacheRepository.findAll();
+            List<TicketTache> tts = this.ticketTacheRepository.findByTicketHistoireId(tt.getTicketHistoireId());
             for(TicketTache ticket:tts){
                 
                 if(tt.equals(ticket)){
                     return null;
-                }
-                    
+                } 
             }
             return this.ticketTacheRepository.save(tt);
-        
-       
     } 
 
     public TicketTache getTicketTacheById(Long id){
@@ -60,9 +57,15 @@ public class TicketTacheService {
     }
 
     public TicketTache modifierTicketTache(TicketTache tt){
-        
+        List<TicketTache> tts = this.ticketTacheRepository.findByTicketHistoireId(tt.getTicketHistoireId());
+        for(TicketTache ticket:tts){
+            if(tt.equals(ticket) && ticket.getId().longValue()!=tt.getId().longValue())
+                return null;
+            
+        }
         if(this.ticketTacheRepository.existsById(tt.getId()))
             return this.ticketTacheRepository.save(tt);
+        
         return null;
     }
 
