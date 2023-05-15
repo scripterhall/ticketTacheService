@@ -129,13 +129,13 @@ public class TicketTacheController {
     public ResponseEntity<TicketTache> prendreTicketTache(@RequestBody Membre membre,
             @PathVariable("id-ticket") Long id) {
         TicketTache ticketTache = ticketTacheService.prendreTicketTache(membre, id);
-
+        SprintBacklog sprintBacklog =null ;
         if (ticketTache == null) {
             return ResponseEntity.notFound().build();
         }
-
-        SprintBacklog sprintBacklog = this.sprintBacklogFeignClient
-                .getSprintBacklogById(ticketTache.getSprintBacklogId());
+        if(ticketTache.getSprintBacklogId()!=null)
+        sprintBacklog = this.sprintBacklogFeignClient
+        .getSprintBacklogById(ticketTache.getSprintBacklogId());
         HistoireTicket ht = this.histoireTicketFeignClient.ticketHistoireById(ticketTache.getTicketHistoireId());
         ticketTache.setSprintBacklog(sprintBacklog);
         ticketTache.setHt(ht);

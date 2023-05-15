@@ -25,7 +25,6 @@ public class MyHandler extends TextWebSocketHandler{
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message)
             throws InterruptedException, IOException {
-                System.out.println(message.getPayload());
                 Map<String, TicketTache> value = new Gson().fromJson(message.getPayload(), Map.class);
                 if(value.keySet().contains("subscribe") || value.keySet().contains("supprimer") || value.keySet().contains("modifier")) {
                     // start the service with the subscribe name
@@ -41,10 +40,7 @@ public class MyHandler extends TextWebSocketHandler{
                     // do something with the sent object
                     
                     messagecount++;
-                    // create object myMessageNumberObject = {type: 'messageNumber', messagecount: messagecount}
-                    // session.sendMessage(new TextMessage(myMessageNumberObject))
-        
-                    // emit message with type='message'
+                    
                     session.sendMessage(new TextMessage(message.getPayload()));
                 }
             }
