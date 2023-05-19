@@ -2,6 +2,7 @@ package com.ms.tickettacheservice.entity;
 
 import java.util.Date;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.ms.tickettacheservice.model.HistoireTicket;
 import com.ms.tickettacheservice.model.Membre;
 import com.ms.tickettacheservice.model.SprintBacklog;
@@ -25,6 +26,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name="ticket_tache")
+@JsonSerialize
 public class TicketTache extends Ticket {
 
     @Id

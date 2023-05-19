@@ -12,6 +12,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+
 import org.springframework.web.bind.annotation.*;
 
 import com.ms.tickettacheservice.entity.TicketTache;
@@ -47,6 +49,8 @@ public class TicketTacheController {
     @Autowired
     private CorbeilleFeignClient corbeilleFeignClient;
 
+ 
+
     @GetMapping
     public ResponseEntity<List<TicketTache>> getTicketsTacheByIdSprint(@RequestParam("sprintId") Long sprintId) {
         List<TicketTache> tts = this.ticketTacheService.findAll();
@@ -79,6 +83,7 @@ public class TicketTacheController {
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
+    @MessageMapping("/topic/tache-socket")
     public ResponseEntity<TicketTache> ajouterTicketTache(@RequestBody TicketTache tt) {
 
         TicketTache tt_saved = ticketTacheService.ajouterTicketTache(tt);
@@ -93,6 +98,9 @@ public class TicketTacheController {
         }
         HistoireTicket ht = this.histoireTicketFeignClient.ticketHistoireById(tt.getTicketHistoireId());
         tt_saved.setHt(ht);
+
+        
+
         return new ResponseEntity<>(tt_saved, HttpStatus.CREATED);
 
     }
@@ -126,13 +134,13 @@ public class TicketTacheController {
     public ResponseEntity<TicketTache> prendreTicketTache(@RequestBody Membre membre,
             @PathVariable("id-ticket") Long id) {
         TicketTache ticketTache = ticketTacheService.prendreTicketTache(membre, id);
-
+        SprintBacklog sprintBacklog =null ;
         if (ticketTache == null) {
             return ResponseEntity.notFound().build();
         }
-
-        SprintBacklog sprintBacklog = this.sprintBacklogFeignClient
-                .getSprintBacklogById(ticketTache.getSprintBacklogId());
+        if(ticketTache.getSprintBacklogId()!=null)
+        sprintBacklog = this.sprintBacklogFeignClient
+        .getSprintBacklogById(ticketTache.getSprintBacklogId());
         HistoireTicket ht = this.histoireTicketFeignClient.ticketHistoireById(ticketTache.getTicketHistoireId());
         ticketTache.setSprintBacklog(sprintBacklog);
         ticketTache.setHt(ht);
