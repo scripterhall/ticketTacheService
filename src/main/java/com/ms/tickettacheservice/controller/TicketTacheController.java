@@ -64,6 +64,10 @@ public class TicketTacheController {
                     }
                     if (tt.getTicketHistoireId() != null)
                         tt.setHt(this.histoireTicketFeignClient.ticketHistoireById(tt.getTicketHistoireId()));
+
+                    if (tt.getMembreId() != null)
+                        tt.setMembre(this.membreClient.getMembreById(tt.getMembreId()));
+
                     filteredTts.add(tt);
                 }
             }
@@ -216,7 +220,7 @@ public class TicketTacheController {
                 List<TicketTache> ticketsTache = this.ticketTacheService.getTicketTacheByMembreId(id);
                 ticketsTache.forEach(ticketTache ->{
                     if(ticketTache.getTicketHistoireId() !=null)
-                        ticketTache.setHt(this.histoireTicketFeignClient.ticketHistoireById(ticketTache.getTicketHistoireId())); 
+                        ticketTache.setHt(this.histoireTicketFeignClient.ticketHistoireById(ticketTache.getTicketHistoireId()));
                     if(ticketTache.getSprintBacklogId()!=null)
                         ticketTache.setSprintBacklog(this.sprintBacklogFeignClient.getSprintBacklogById(ticketTache.getSprintBacklogId()));
                     ticketTache.setMembre(this.membreClient.getMembreById(id));
